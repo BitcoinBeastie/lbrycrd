@@ -1838,12 +1838,12 @@ DisconnectResult CChainState::DisconnectBlock(const CBlock& block, const CBlockI
         }
 
         // remove any claims
-        for (size_t j = 0; j < tx.vout.size(); j++)
+        for (uint32_t j = tx.vout.size(); j > 0; --j)
         {
-            const CTxOut& txout = tx.vout[j];
+            const CTxOut& txout = tx.vout[j - 1];
 
             if (!txout.scriptPubKey.empty()) {
-                CClaimScriptUndoAddOp undoAdd(COutPoint(hash, j), pindex->nHeight);
+                CClaimScriptUndoAddOp undoAdd(COutPoint(hash, j - 1), pindex->nHeight);
                 ProcessClaim(undoAdd, trieCache, txout.scriptPubKey);
             }
         }

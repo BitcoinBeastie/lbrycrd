@@ -108,7 +108,7 @@ bool CCoinsViewDB::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock, boo
         }
     }
 
-    db << "begin";
+    db << "BEGIN";
     db << "INSERT OR REPLACE INTO marker VALUES('head_block', ?)" << hashBlock;
     for (auto it = mapCoins.begin(); it != mapCoins.end();) {
         if (it->second.flags & CCoinsCacheEntry::DIRTY) {
@@ -297,7 +297,7 @@ void CCoinsViewDBCursor::Next()
 
 bool CBlockTreeDB::BatchWrite(const std::vector<std::pair<int, const CBlockFileInfo*> >& fileInfo,
                               int nLastFile, const std::vector<const CBlockIndex*>& blockInfo, bool sync) {
-    db << "begin";
+    db << "BEGIN";
     auto ibf = db << "INSERT OR REPLACE INTO block_file(file, blocks, size, undoSize, heightFirst, heightLast, timeFirst, timeLast) "
                      "VALUES(?,?,?,?,?,?,?,?)";
     for (auto& kvp: fileInfo) {
@@ -393,7 +393,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
 bool CBlockTreeDB::WriteTxIndex(const FlatFilePos& file, const std::vector<std::pair<uint256, uint32_t>>& txOffsets)
 {
     if (txOffsets.empty()) return true;
-    db << "begin";
+    db << "BEGIN";
     auto query = db << "INSERT OR REPLACE INTO tx_to_block VALUES(?,?,?,?)";
     for (auto& kvp: txOffsets) {
         query << kvp.first << file.nFile << file.nPos << kvp.second;

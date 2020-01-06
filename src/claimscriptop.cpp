@@ -65,7 +65,8 @@ bool CClaimScriptUndoAddOp::undoAddClaim(CClaimTrieCache& trieCache, const std::
     int validHeight, originalHeight;
     bool res = trieCache.removeClaim(claimId, point, nodeName, validHeight, originalHeight);
     if (!res)
-        LogPrint(BCLog::CLAIMS, "Remove claim failed for %s with claimid %s\n", name, claimId.GetHex().substr(0, 6));
+        LogPrint(BCLog::CLAIMS, "Remove claim failed for %s (%s) with claimID %.6s, t:%.6s:%d\n", name, nodeName,
+                claimId.GetHex(), point.hash.GetHex(), point.n);
     return res;
 }
 
@@ -77,7 +78,8 @@ bool CClaimScriptUndoAddOp::supportClaim(CClaimTrieCache& trieCache, const std::
     int validHeight;
     bool res = trieCache.removeSupport(point, nodeName, validHeight);
     if (!res)
-        LogPrint(BCLog::CLAIMS, "Remove support failed for %s with claimid %s\n", name, claimId.GetHex().substr(0, 6));
+        LogPrint(BCLog::CLAIMS, "Remove support failed for %s with claimID %.6s, t:%.6s:%d\n", name,
+                 claimId.GetHex(), point.hash.GetHex(), point.n);
     return res;
 }
 
@@ -190,6 +192,7 @@ void UpdateCache(const CTransaction& tx, CClaimTrieCache& trieCache, const CCoin
         bool spendClaim(CClaimTrieCache& trieCache, const std::string& name, const uint160& claimId) override
         {
             if (CClaimScriptSpendOp::spendClaim(trieCache, name, claimId)) {
+                assert(nOriginalHeight >= 0);
                 callback(name, claimId, nOriginalHeight);
                 return true;
             }
@@ -257,6 +260,7 @@ void UpdateCache(const CTransaction& tx, CClaimTrieCache& trieCache, const CCoin
             for (auto itSpent = spentClaims.begin(); itSpent != spentClaims.end(); ++itSpent) {
                 if (itSpent->id == claimId && trieCache.normalizeClaimName(name) == trieCache.normalizeClaimName(itSpent->name)) {
                     spentClaims.erase(itSpent);
+                    assert(itSpent->originalHeight >= 0);
                     return itSpent->originalHeight;
                 }
             }
