@@ -238,7 +238,7 @@ void Shutdown(InitInterfaces& interfaces)
     {
         LOCK(cs_main);
         if (g_chainstate && g_chainstate->CanFlushToDisk()) {
-            g_chainstate->ForceFlushStateToDisk();
+            g_chainstate->ForceFlushStateToDisk(true);
         }
     }
 
@@ -255,7 +255,7 @@ void Shutdown(InitInterfaces& interfaces)
     {
         LOCK(cs_main);
         if (g_chainstate && g_chainstate->CanFlushToDisk()) {
-            g_chainstate->ForceFlushStateToDisk();
+            g_chainstate->ForceFlushStateToDisk(true);
             g_chainstate->ResetCoinsViews();
         }
         pblocktree.reset();
